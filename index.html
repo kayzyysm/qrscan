@@ -106,24 +106,19 @@
     </p>
 
     <script>
-        // 1. ระบบแสกน (Scanner)
-        let isScanning = true; // ตัวแปรคุมไม่ให้แสกนซ้ำเด้งรัว
+        let isScanning = true;
 
         function onScanSuccess(decodedText) {
-            if (isScanning) {
-                // ถ้าแสกนเจอลิงก์ (URL) ให้วิ่งไปที่เว็บนั้นทันที
                 if (decodedText.startsWith("http")) {
-                    isScanning = false; // หยุดแสกน
+                    isScanning = false;
                     window.location.href = decodedText;
                 } else {
-                    // ถ้าไม่ใช่ลิงก์ ให้ดึงค่าใส่ช่องชื่อสินค้าปกติ
                     document.getElementById('prodName').value = decodedText;
                     alert("ดึงรหัสสินค้าสำเร็จ: " + decodedText);
                 }
             }
         }
 
-        // เริ่มต้นการใช้งานกล้อง
         let html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
             fps: 10, 
             qrbox: 250,
@@ -132,7 +127,6 @@
         html5QrcodeScanner.render(onScanSuccess);
 
 
-        // 2. ระบบสร้าง QR (Generator)
         function generateNewQR() {
             const name = document.getElementById('prodName').value;
             const type = document.getElementById('prodType').value;
@@ -143,12 +137,10 @@
                 return;
             }
 
-            // แปลงค่าให้ปลอดภัยสำหรับ URL
             const encName = encodeURIComponent(name);
             const encType = encodeURIComponent(type);
             const encDate = encodeURIComponent(date);
 
-            // ลิงก์ที่จะไปหน้าแสดงผล
             const myWebsite = "https://kayzyysm.github.io/qrscan/view.html";
             const finalURL = `${myWebsite}?name=${encName}&type=${encType}&date=${encDate}`;
 
@@ -157,7 +149,6 @@
             const qrContainer = document.getElementById("qrcode");
             qrContainer.innerHTML = '<canvas id="qr-canvas"></canvas>';
 
-            // สร้างรูป QR Code
             new QRious({
                 element: document.getElementById('qr-canvas'),
                 value: finalURL,
@@ -167,10 +158,10 @@
 
             document.getElementById("qrText").style.display = "block";
             
-            // เลื่อนหน้าจอลงมาที่รูป QR
             window.scrollTo(0, document.body.scrollHeight);
         }
     </script>
 </body>
+
 
 </html>
