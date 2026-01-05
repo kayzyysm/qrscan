@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock QR Scanner & Gen</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            text-align: center;
+            background: #f4f4f4;
+        }
+
+        #reader {
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
+            border: 2px solid #333;
+        }
+
+        .form-group {
+            margin: 15px 0;
+            text-align: left;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        #qrcode {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>📦 ระบบจัดการสินค้า</h2>
+
+    <div id="reader"></div>
+    <p>แสกนรหัสสินค้าเดิมเพื่อดึงข้อมูล</p>
+
+    <hr>
+
+    <div class="form-group">
+        <label>ชื่อสินค้า:</label>
+        <input type="text" id="prodName" placeholder="ระบุชื่อสินค้า">
+    </div>
+    <div class="form-group">
+        <label>ชนิดสินค้า:</label>
+        <input type="text" id="prodType" placeholder="เช่น อาหาร, เครื่องใช้">
+    </div>
+    <div class="form-group">
+        <label>วันที่นำเข้า:</label>
+        <input type="date" id="importDate">
+    </div>
+
+    <button onclick="generateNewQR()">สร้าง QR Code ใหม่</button>
+
+    <div id="qrcode"></div>
+    <p id="qrText" style="display:none;">คลิกขวาที่รูปเพื่อบันทึกหรือสั่งพิมพ์</p>
+
+    <script>
+        // 1. ตั้งค่า Scanner
+        function onScanSuccess(decodedText) {
+            document.getElementById('prodName').value = decodedText;
+            alert("ดึงข้อมูลสำเร็จ: " + decodedText);
+        }
+
+        let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render(onScanSuccess);
+
+        // 2. ฟังก์ชันสร้าง QR ใหม่
+        function generateNewQR() {
+            const name = document.getElementById('prodName').value;
+            const type = document.getElementById('prodType').value;
+            const date = document.getElementById('importDate').value;
+
+            // รวมข้อมูลเป็นชุดเดียวกัน
+            const combinedData = `ชื่อ:${name}, ชนิด:${type}, วันที่:${date}`;
+
+            // ล้างค่าเก่าใน div ออกก่อน
+            const qrContainer = document.getElementById("qrcode");
+            qrContainer.innerHTML = '<canvas id="qr-canvas"></canvas>';
+
+            // ใช้ QRious สร้าง QR ลงใน Canvas
+            var qr = new QRious({
+                element: document.getElementById('qr-canvas'),
+                value: combinedData,
+                size: 250,
+                level: 'M' // ความละเอียดระดับ Medium (กำลังดี)
+            });
+
+            document.getElementById("qrText").style.display = "block";
+        }
+    </script>
+</body>
+
+</html>
