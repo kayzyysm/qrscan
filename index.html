@@ -9,17 +9,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
         body {
-            font-family: sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 20px;
             text-align: center;
-            background: #f4f4f4;
+            background: #f4f7f6;
+            color: #333;
         }
 
         #reader {
             width: 100%;
             max-width: 400px;
-            margin: auto;
-            border: 2px solid #333;
+            margin: 20px auto;
+            border: 5px solid #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
 
         .form-group {
@@ -30,11 +34,16 @@
             margin-right: auto;
         }
 
+        label { font-weight: bold; }
+
         input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin-top: 5px;
             box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
         }
 
         button {
@@ -43,24 +52,36 @@
             border: none;
             padding: 15px 30px;
             cursor: pointer;
-            font-size: 16px;
-            border-radius: 5px;
+            font-size: 18px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+            margin-top: 10px;
+            transition: 0.3s;
         }
 
+        button:hover { background: #218838; }
+
         #qrcode {
-            margin-top: 20px;
+            margin-top: 25px;
             display: flex;
             justify-content: center;
+            padding: 10px;
+            background: white;
+            display: inline-block;
+            border-radius: 10px;
         }
+
+        hr { border: 0; height: 1px; background: #ddd; margin: 30px 0; }
     </style>
 </head>
 
 <body>
 
-    <h2>📦 ระบบจัดการสินค้า</h2>
+    <h2>📦 ระบบจัดการสินค้า (Scan & Gen)</h2>
 
     <div id="reader"></div>
-    <p>แสกนรหัสสินค้าเดิมเพื่อดึงข้อมูล</p>
+    <p id="scan-status">🎥 กำลังเปิดกล้องเพื่อแสกน...</p>
 
     <hr>
 
@@ -77,43 +98,69 @@
         <input type="date" id="importDate">
     </div>
 
-    <button onclick="generateNewQR()">สร้าง QR Code ใหม่</button>
+    <button onclick="generateNewQR()">สร้าง QR Code สำหรับสินค้านี้</button>
 
     <div id="qrcode"></div>
-    <p id="qrText" style="display:none;">คลิกขวาที่รูปเพื่อบันทึกหรือสั่งพิมพ์</p>
+    <p id="qrText" style="display:none; color: #666; font-size: 14px; margin-top: 10px;">
+        ค้างที่รูปเพื่อบันทึก หรือแสกนเพื่อดูข้อมูล
+    </p>
 
     <script>
+        let isScanning = true;
+
         function onScanSuccess(decodedText) {
-            document.getElementById('prodName').value = decodedText;
-            alert("ดึงข้อมูลสำเร็จ: " + decodedText);
+            if (isScanning) {
+                if (decodedText.startsWith("http")) {
+                    isScanning = false; // หยุดแสกน
+                    window.location.href = decodedText;
+                } else {
+                    document.getElementById('prodName').value = decodedText;
+                    alert("ดึงรหัสสินค้าสำเร็จ: " + decodedText);
+                }
+            }
         }
 
-        let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+        let html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+            fps: 10, 
+            qrbox: 250,
+            rememberLastUsedCamera: true 
+        });
         html5QrcodeScanner.render(onScanSuccess);
 
+
         function generateNewQR() {
-            const name = encodeURIComponent(document.getElementById('prodName').value);
-            const type = encodeURIComponent(document.getElementById('prodType').value);
-            const date = encodeURIComponent(document.getElementById('importDate').value);
+            const name = document.getElementById('prodName').value;
+            const type = document.getElementById('prodType').value;
+            const date = document.getElementById('importDate').value;
+
+            if(!name || !date) {
+                alert("กรุณากรอกชื่อสินค้าและวันที่นำเข้าให้ครบถ้วน");
+                return;
+            }
+
+            const encName = encodeURIComponent(name);
+            const encType = encodeURIComponent(type);
+            const encDate = encodeURIComponent(date);
 
             const myWebsite = "https://kayzyysm.github.io/qrscan/view.html";
+            const finalURL = `${myWebsite}?name=${encName}&type=${encType}&date=${encDate}`;
 
-            const finalURL = `${myWebsite}?name=${name}&type=${type}&date=${date}`;
-
-            console.log("Link ใน QR:", finalURL);
+            console.log("สร้าง QR ลิงก์:", finalURL);
 
             const qrContainer = document.getElementById("qrcode");
             qrContainer.innerHTML = '<canvas id="qr-canvas"></canvas>';
 
-            var qr = new QRious({
+            new QRious({
                 element: document.getElementById('qr-canvas'),
                 value: finalURL,
                 size: 250,
-                level: 'L'
+                level: 'M'
             });
-        }
 
-        document.getElementById("qrText").style.display = "block";
+            document.getElementById("qrText").style.display = "block";
+            
+            window.scrollTo(0, document.body.scrollHeight);
+        }
     </script>
 </body>
 
