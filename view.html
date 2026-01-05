@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ข้อมูลสินค้า</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #eee; text-align: center; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        .data { font-size: 1.2em; color: #333; margin: 10px 0; border-bottom: 1px solid #ddd; padding: 10px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>📦 รายละเอียดสินค้า</h2>
+        <div id="display-name" class="data">กำลังโหลด...</div>
+        <div id="display-type" class="data"></div>
+        <div id="display-date" class="data"></div>
+        <button onclick="window.location.href='index.html'" style="margin-top:20px;">กลับหน้าหลัก</button>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        document.getElementById('display-name').innerText = "ชื่อ: " + (urlParams.get('name') || "-");
+        document.getElementById('display-type').innerText = "ชนิด: " + (urlParams.get('type') || "-");
+        document.getElementById('display-date').innerText = "วันที่เข้า: " + (urlParams.get('date') || "-");
+    </script>
+</body>
+</html>
